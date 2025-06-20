@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Онлайн Мол</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .home-container {
+            max-width: 800px;
+            margin: 5rem auto;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .home-title {
+            font-size: 2.6rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .home-subtitle {
+            font-size: 1.3rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        .floor-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .floor-buttons button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            background-color: #007bff;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .floor-buttons button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="home-container">
+    <h1 class="home-title">Добре дошли в Онлайн Мол 🏬</h1>
+    <p class="home-subtitle">Изберете етаж, за да разгледате магазините:</p>
+
+    <div class="floor-buttons">
+        <button onclick="goToCategory('CLOTHING')">Етаж 1 – Мода 👗</button>
+        <button onclick="goToCategory('TECHNOLOGY')">Етаж 2 – Техника 💻</button>
+        <button onclick="goToCategory('FOOD')">Етаж 3 – Храна 🍔</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    fetch("navbar.html")
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById("navbar-container").innerHTML = data;
+        });
+
+    function goToCategory(category) {
+        window.location.href = `stores.html?category=${category}`;
+    }
+</script>
+</body>
+</html>

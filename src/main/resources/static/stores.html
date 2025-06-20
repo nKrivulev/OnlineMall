@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Магазини</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .stores-container {
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .stores-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            width: 260px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .add-store-form {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+
+        .add-store-form input, .add-store-form select {
+            width: 100%;
+            padding: 0.6rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .add-store-form button {
+            margin-top: 1rem;
+            padding: 0.7rem 1.2rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .add-store-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="stores-container">
+    <h1>Магазини</h1>
+    <div id="storeList" class="grid"></div>
+
+    <div id="addStoreSection" class="add-store-form" style="display: none;">
+        <h2>Добави магазин</h2>
+        <input type="text" id="storeName" placeholder="Име" required>
+        <input type="text" id="storeDesc" placeholder="Описание">
+        <input type="text" id="storeImage" placeholder="Image URL">
+        <select id="storeFloor">
+            <option value="1">Етаж 1</option>
+            <option value="2">Етаж 2</option>
+            <option value="3">Етаж 3</option>
+        </select>
+        <select id="storeCategory">
+            <option value="CLOTHING">Мода</option>
+            <option value="TECHNOLOGY">Техника</option>
+            <option value="FOOD">Храна</option>
+        </select>
+        <button onclick="submitStore()">Създай</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    const category = new URLSearchParams(window.location.search).get("category");
+    const floor = new URLSearchParams(window.location.search).get("floor");
+
+    async function loadStores() {
+        let url = `${API}/stores`;
+        if (category) url += `?category=${category}`;
+        if (floor) url += `?floor=${floor}`;
+
+        const res = await fetch(url);
+        const stores = await res.json();
+
+        const container = document.getElementById("storeList");
+        container.innerHTML = "";
+
+        if (stores.length === 0) {
+            container.innerHTML = "<p>Няма магазини за тази категория/етаж.</p>";
+            return;
+        }
+
+        stores.forEach(store => {
+            const el = document.createElement("div");
+            el.className = "card";
+            el.innerHTML = `
+                <h3>${store.name}</h3>
+                <img src="${store.imageUrl}" alt="${store.name}">
+                <p>${store.description}</p>
+                <p><strong>Категория:</strong> ${store.category}</p>
+                <p><strong>Етаж:</strong> ${store.floor}</p>
+                <a href="products.html?storeId=${store.id}"><button>Виж продукти</button></a>
+            `;
+            container.appendChild(el);
+        });
+    }
+
+    async function checkIfSeller() {
+        const user = await getCurrentUser();
+        if (user && user.role === "SELLER") {
+            document.getElementById("addStoreSection").style.display = "block";
+        }
+    }
+
+    loadStores();
+    checkIfSeller();
+
+    fetch("navbar.html")
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById("navbar-container").innerHTML = data;
+        });
+</script>
+</body>
+</html>

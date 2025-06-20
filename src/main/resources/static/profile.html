@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Моят профил</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-container {
+            max-width: 500px;
+            margin: 5rem auto;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .profile-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .profile-container p {
+            font-size: 1.1rem;
+            margin: 0.8rem 0;
+            color: #555;
+        }
+
+        .profile-container input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        .profile-container button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #17a2b8;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .profile-container button:hover {
+            background-color: #117a8b;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="profile-container">
+    <h1>Профил</h1>
+    <p><strong>Потребител:</strong> <span id="username"></span></p>
+    <p><strong>Имейл:</strong> <span id="email"></span></p>
+    <p><strong>Баланс:</strong> <span id="balance"></span> лв.</p>
+
+    <h2 style="margin-top: 30px;">Добави средства</h2>
+    <input type="number" id="amount" placeholder="Сума" min="1" required>
+    <button onclick="addBalance()">Добави</button>
+
+    <div class="back-link">
+        <a href="stores.html">⬅ Назад към магазините</a>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    async function loadProfile() {
+        const user = await getCurrentUser();
+        if (!user) {
+            alert("Моля, влезте в акаунта си.");
+            window.location.href = "index.html";
+            return;
+        }
+
+        document.getElementById("username").textContent = user.username;
+        document.getElementById("email").textContent = user.email;
+        document.getElementById("balance").textContent = user.balance.toFixed(2);
+    }
+
+    async function addBalance() {
+        const amount = parseFloat(document.getElementById("amount").value);
+        if (isNaN(amount) || amount <= 0) {
+            alert("Моля, въведете валидна сума.");
+            return;
+        }
+
+        const res = await fetch(`${API}/users/add-balance`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount })
+        });
+
+        if (res.ok) {
+            alert("Балансът е обновен!");
+            loadProfile();
+        } else {
+            alert("Грешка при добавяне на баланс.");
+        }
+    }
+
+    loadProfile();
+</script>
+</body>
+</html>

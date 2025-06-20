@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Моята количка</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .cart-container {
+            max-width: 900px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .cart-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .summary {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 1.2rem;
+        }
+
+        .summary button {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .summary button:hover {
+            background-color: #218838;
+        }
+
+        .card button {
+            margin-top: 0.5rem;
+            background-color: #dc3545;
+        }
+
+        .card button:hover {
+            background-color: #bb2d3b;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="cart-container">
+    <h1>Моята количка</h1>
+    <div id="cartItems" class="grid"></div>
+
+    <div class="summary">
+        <p><strong>Общо:</strong> <span id="totalAmount">0.00</span> лв.</p>
+        <button onclick="checkout()">Завърши поръчката</button>
+    </div>
+
+    <div class="back-link">
+        <a href="stores.html">⬅ Назад към магазините</a>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    async function loadCart() {
+        const res = await fetch(`${API}/cart`);
+        const items = await res.json();
+
+        const container = document.getElementById("cartItems");
+        const totalSpan = document.getElementById("totalAmount");
+        container.innerHTML = "";
+
+        if (items.length === 0) {
+            container.innerHTML = "<p>Количката е празна.</p>";
+            totalSpan.textContent = "0.00";
+            return;
+        }
+
+        let total = 0;
+
+        items.forEach(item => {
+            const el = document.createElement("div");
+            el.className = "card";
+            const subtotal = item.quantity * item.product.price;
+            total += subtotal;
+
+            el.innerHTML = `
+                <h3>${item.product.name}</h3>
+                <img src="${item.product.imageUrl}" width="120">
+                <p><strong>Брой:</strong> ${item.quantity}</p>
+                <p><strong>Цена:</strong> ${item.product.price.toFixed(2)} лв.</p>
+                <p><strong>Общо:</strong> ${subtotal.toFixed(2)} лв.</p>
+                <button onclick="removeItem(${item.id})">Премахни</button>
+            `;
+            container.appendChild(el);
+        });
+
+        totalSpan.textContent = total.toFixed(2);
+    }
+
+    async function removeItem(itemId) {
+        const res = await fetch(`${API}/cart/${itemId}`, { method: "DELETE" });
+
+        if (res.ok) {
+            loadCart();
+        } else {
+            alert("Грешка при премахване.");
+        }
+    }
+
+    async function checkout() {
+        const res = await fetch(`${API}/cart/checkout`, { method: "POST" });
+
+        if (res.ok) {
+            const msg = await res.text();
+            alert(msg);
+            loadCart();
+        } else {
+            alert("Грешка при поръчката.");
+        }
+    }
+
+    loadCart();
+</script>
+</body>
+</html>

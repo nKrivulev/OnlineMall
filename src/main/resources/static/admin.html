@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ панел</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Навбар -->
+<div id="navbar-container"></div>
+
+<div class="container">
+    <h1>👮 Административен панел</h1>
+    <p>Само за потребители с роля <strong>ADMIN</strong>.</p>
+
+    <hr>
+
+    <h2>👤 Всички потребители</h2>
+    <table id="usersTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Потребител</th>
+            <th>Email</th>
+            <th>Роля</th>
+            <th>Баланс</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <hr>
+
+    <h2>🏬 Всички магазини</h2>
+    <table id="storesTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Име</th>
+            <th>Описание</th>
+            <th>Собственик</th>
+            <th>Категория</th>
+            <th>Етаж</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <br>
+    <a href="index.html">⬅ Назад към начална страница</a>
+</div>
+
+<script src="script.js"></script>
+<script>
+    // Зареждане на навбар
+    fetch("navbar.html")
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById("navbar-container").innerHTML = data;
+        });
+
+    async function loadUsers() {
+        const res = await fetch(`${API}/users`);
+        const users = await res.json();
+        const tbody = document.querySelector("#usersTable tbody");
+        tbody.innerHTML = "";
+
+        users.forEach(u => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${u.id}</td>
+                <td>${u.username}</td>
+                <td>${u.email}</td>
+                <td>${u.role}</td>
+                <td>${u.balance.toFixed(2)} лв.</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function loadStores() {
+        const res = await fetch(`${API}/stores`);
+        const stores = await res.json();
+        const tbody = document.querySelector("#storesTable tbody");
+        tbody.innerHTML = "";
+
+        stores.forEach(s => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.description}</td>
+                <td>${s.ownerUsername || "?"}</td>
+                <td>${s.category}</td>
+                <td>${s.floor}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    loadUsers();
+    loadStores();
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .register-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .register-container h1 {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .register-container input, .register-container select {
+            width: 100%;
+            padding: 0.7rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        .register-container button {
+            padding: 0.7rem 1.2rem;
+            margin-top: 1rem;
+            background-color: #007bff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .register-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .register-container p {
+            margin-top: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .register-container a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .register-container a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="register-container">
+    <h1>Създай акаунт</h1>
+    <form id="registerForm">
+        <input type="text" id="username" placeholder="Потребителско име" required>
+        <input type="email" id="email" placeholder="Имейл" required>
+        <input type="password" id="password" placeholder="Парола" required>
+        <select id="role" required>
+            <option value="">Избери роля</option>
+            <option value="USER">Потребител</option>
+            <option value="SELLER">Продавач</option>
+            <option value="ADMIN">Админ</option>
+        </select>
+        <button type="submit">Регистрирай се</button>
+    </form>
+    <p>Имаш акаунт? <a href="index.html">Влез</a></p>
+</div>
+
+<script src="script.js"></script>
+<script>
+    fetch("navbar.html")
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById("navbar-container").innerHTML = data;
+        });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+        };
+
+        const res = await fetch(`${API}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert("Регистрацията е успешна!");
+            window.location.href = "index.html";
+        } else {
+            alert("Регистрацията се провали. Проверете данните.");
+        }
+    });
+</script>
+</body>
+</html>

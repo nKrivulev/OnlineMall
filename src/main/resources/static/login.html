@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container h1 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.6rem 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #007bff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .login-container p {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .login-container a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .login-container a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="login-container">
+    <h1>Вход в акаунта</h1>
+    <form method="post" action="/login">
+        <input type="text" name="username" placeholder="Потребителско име" required>
+        <input type="password" name="password" placeholder="Парола" required>
+        <button type="submit">Вход</button>
+    </form>
+    <p>Нямаш акаунт? <a href="register.html">Регистрирай се</a></p>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

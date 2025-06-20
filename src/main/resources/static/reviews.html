@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ панел</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .admin-container h1, h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f1f1;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="admin-container">
+    <h1>👮 Административен панел</h1>
+    <p style="text-align: center;">Само за потребители с роля <strong>ADMIN</strong>.</p>
+
+    <h2>👤 Всички потребители</h2>
+    <table id="usersTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Потребител</th>
+            <th>Email</th>
+            <th>Роля</th>
+            <th>Баланс</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>🏬 Всички магазини</h2>
+    <table id="storesTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Име</th>
+            <th>Описание</th>
+            <th>Собственик</th>
+            <th>Категория</th>
+            <th>Етаж</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div class="back-link">
+        <a href="index.html">⬅ Назад към начална страница</a>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    fetch("navbar.html")
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById("navbar-container").innerHTML = data;
+        });
+
+    async function loadUsers() {
+        const res = await fetch(`${API}/users`);
+        const users = await res.json();
+        const tbody = document.querySelector("#usersTable tbody");
+        tbody.innerHTML = "";
+
+        users.forEach(u => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${u.id}</td>
+                <td>${u.username}</td>
+                <td>${u.email}</td>
+                <td>${u.role}</td>
+                <td>${u.balance.toFixed(2)} лв.</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function loadStores() {
+        const res = await fetch(`${API}/stores`);
+        const stores = await res.json();
+        const tbody = document.querySelector("#storesTable tbody");
+        tbody.innerHTML = "";
+
+        stores.forEach(s => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.description}</td>
+                <td>${s.ownerUsername || "?"}</td>
+                <td>${s.category}</td>
+                <td>${s.floor}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    loadUsers();
+    loadStores();
+</script>
+</body>
+</html>

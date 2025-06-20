@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Моите поръчки</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .orders-container {
+            max-width: 900px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .orders-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .card ul {
+            padding-left: 1.2rem;
+            margin-top: 0.5rem;
+        }
+
+        .card li {
+            margin-bottom: 0.3rem;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="orders-container">
+    <h1>Моите поръчки</h1>
+    <div id="orders"></div>
+
+    <div class="back-link">
+        <a href="stores.html">⬅ Назад към магазините</a>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    async function loadOrders() {
+        const user = await getCurrentUser();
+        if (!user) {
+            alert("Моля, влезте в акаунта си.");
+            window.location.href = "index.html";
+            return;
+        }
+
+        const res = await fetch(`${API}/orders`);
+        const orders = await res.json();
+
+        const container = document.getElementById("orders");
+        container.innerHTML = "";
+
+        if (orders.length === 0) {
+            container.innerHTML = "<p>Все още нямате направени поръчки.</p>";
+            return;
+        }
+
+        orders.forEach(order => {
+            const el = document.createElement("div");
+            el.className = "card";
+
+            const createdAt = new Date(order.createdAt).toLocaleString("bg-BG");
+
+            let productsList = "";
+            order.products.forEach(p => {
+                productsList += `<li>${p.name} – ${p.price.toFixed(2)} лв.</li>`;
+            });
+
+            el.innerHTML = `
+                <p><strong>Поръчка №:</strong> ${order.id}</p>
+                <p><strong>Дата:</strong> ${createdAt}</p>
+                <p><strong>Сума:</strong> ${order.totalAmount.toFixed(2)} лв.</p>
+                <ul>${productsList}</ul>
+            `;
+
+            container.appendChild(el);
+        });
+    }
+
+    loadOrders();
+</script>
+</body>
+</html>
