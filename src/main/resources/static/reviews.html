@@ -2,41 +2,70 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <title>Админ панел</title>
+    <title>Отзиви</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .admin-container {
-            max-width: 1000px;
-            margin: 5rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        .review-container {
+            max-width: 900px;
+            margin: 4rem auto;
+            background: #ffffff;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
 
-        .admin-container h1, h2 {
+        .review-container h1 {
             text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
             margin-bottom: 2rem;
+            font-size: 2.3rem;
+            color: #343a40;
         }
 
-        th, td {
+        .card {
+            background: #f1f3f5;
+            padding: 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .card p {
+            margin: 0.3rem 0;
+            color: #333;
+        }
+
+        .form-group {
+            margin-top: 2rem;
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
             padding: 0.75rem;
-            border: 1px solid #ddd;
-            text-align: left;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            resize: vertical;
         }
 
-        th {
-            background-color: #f1f1f1;
+        .form-group button {
+            margin-top: 0.8rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.4rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        tr:hover {
-            background-color: #f9f9f9;
+        .form-group button:hover {
+            background-color: #218838;
         }
 
         .back-link {
@@ -56,94 +85,92 @@
 </head>
 <body>
 <div id="navbar-container"></div>
+<script src="script.js"></script>
 
-<div class="admin-container">
-    <h1>👮 Административен панел</h1>
-    <p style="text-align: center;">Само за потребители с роля <strong>ADMIN</strong>.</p>
+<div class="review-container">
+    <h1>📝 Отзиви за продукта</h1>
 
-    <h2>👤 Всички потребители</h2>
-    <table id="usersTable">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Потребител</th>
-            <th>Email</th>
-            <th>Роля</th>
-            <th>Баланс</th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div id="reviews"></div>
 
-    <h2>🏬 Всички магазини</h2>
-    <table id="storesTable">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Име</th>
-            <th>Описание</th>
-            <th>Собственик</th>
-            <th>Категория</th>
-            <th>Етаж</th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="form-group">
+        <h3>Добави отзив</h3>
+        <label for="rating">Оценка (1 до 5):</label>
+        <input type="number" id="rating" min="1" max="5" required>
+
+        <label for="comment">Коментар:</label>
+        <textarea id="comment" rows="3" placeholder="Споделете впечатленията си..."></textarea>
+
+        <button onclick="submitReview()">Изпрати</button>
+    </div>
 
     <div class="back-link">
-        <a href="index.html">⬅ Назад към начална страница</a>
+        <a href="#" id="backLink">⬅ Назад към продуктите</a>
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
-    fetch("navbar.html")
-        .then(res => res.text())
-        .then(data => {
-            document.getElementById("navbar-container").innerHTML = data;
-        });
+    const productId = localStorage.getItem("currentProductId");
 
-    async function loadUsers() {
-        const res = await fetch(`${API}/users`);
-        const users = await res.json();
-        const tbody = document.querySelector("#usersTable tbody");
-        tbody.innerHTML = "";
+    async function loadReviews() {
+        const res = await fetch(`${API}/reviews/product/${productId}`);
+        const reviews = await res.json();
 
-        users.forEach(u => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${u.id}</td>
-                <td>${u.username}</td>
-                <td>${u.email}</td>
-                <td>${u.role}</td>
-                <td>${u.balance.toFixed(2)} лв.</td>
+        const container = document.getElementById("reviews");
+        container.innerHTML = "";
+
+        if (reviews.length === 0) {
+            container.innerHTML = "<p>❌ Няма отзиви все още.</p>";
+            return;
+        }
+
+        reviews.forEach(r => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <p><strong>👤 ${r.username}</strong></p>
+                <p>⭐ ${r.rating} / 5</p>
+                <p>${r.comment}</p>
             `;
-            tbody.appendChild(tr);
+            container.appendChild(card);
         });
     }
 
-    async function loadStores() {
-        const res = await fetch(`${API}/stores`);
-        const stores = await res.json();
-        const tbody = document.querySelector("#storesTable tbody");
-        tbody.innerHTML = "";
+    async function submitReview() {
+        const rating = parseInt(document.getElementById("rating").value);
+        const comment = document.getElementById("comment").value.trim();
 
-        stores.forEach(s => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${s.id}</td>
-                <td>${s.name}</td>
-                <td>${s.description}</td>
-                <td>${s.ownerUsername || "?"}</td>
-                <td>${s.category}</td>
-                <td>${s.floor}</td>
-            `;
-            tbody.appendChild(tr);
+        if (!rating || rating < 1 || rating > 5 || comment === "") {
+            alert("Моля, въведете валидна оценка и коментар.");
+            return;
+        }
+
+        const res = await fetch(`${API}/reviews/${productId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ rating, comment })
         });
+
+        if (res.ok) {
+            alert("✅ Отзивът е записан успешно.");
+            document.getElementById("rating").value = "";
+            document.getElementById("comment").value = "";
+            loadReviews();
+        } else {
+            const error = await res.text();
+            alert("⚠️ Грешка: " + error);
+        }
     }
 
-    loadUsers();
-    loadStores();
+    // 👉 Поправен back линк
+    const storeId = localStorage.getItem("currentStoreId");
+    if (storeId) {
+        document.getElementById("backLink").href = `products.html?storeId=${storeId}`;
+    } else {
+        document.getElementById("backLink").href = "stores.html";
+    }
+
+    loadReviews();
 </script>
 </body>
 </html>

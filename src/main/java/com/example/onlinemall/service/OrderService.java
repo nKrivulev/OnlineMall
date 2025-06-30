@@ -6,17 +6,18 @@ import com.example.onlinemall.model.Order;
 import com.example.onlinemall.model.Product;
 import com.example.onlinemall.model.User;
 import com.example.onlinemall.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
+    private final ProductService productService;
 
     public Order createOrder(User user, List<Product> products, double totalAmount) {
         Order order = Order.builder()
@@ -33,9 +34,6 @@ public class OrderService {
         return orderRepository.findByUser(user);
     }
 
-    @Autowired
-    private ProductService productService;
-
     public OrderResponse toResponse(Order order) {
         OrderResponse response = new OrderResponse();
         response.setId(order.getId());
@@ -49,5 +47,4 @@ public class OrderService {
         response.setProducts(productResponses);
         return response;
     }
-
 }

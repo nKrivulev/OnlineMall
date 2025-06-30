@@ -37,8 +37,8 @@ public class StoreController {
     private StoreRepository storeRepository;
 
     @GetMapping("/floor/{floor}")
-    public ResponseEntity<List<Store>> getStoresByFloor(@PathVariable int floor) {
-        return ResponseEntity.ok(storeService.getStoresByFloor(floor));
+    public List<Store> getStoresByFloor(@PathVariable int floor) {
+        return storeRepository.findByFloor(floor);
     }
 
     @GetMapping("/{storeId}")
@@ -49,10 +49,23 @@ public class StoreController {
     }
 
     @GetMapping
-    public List<StoreResponse> getAllStores() {
-        return storeService.getAllStores().stream()
-                .map(storeService::toResponse)
-                .toList();
+    public List<StoreResponse> getStores(
+            @RequestParam(required = false) Integer floor,
+            @RequestParam(required = false) StoreCategory category
+    ) {
+        List<Store> stores;
+
+        if (floor != null && category != null) {
+            stores = storeRepository.findByFloorAndCategory(floor, category);
+        } else if (floor != null) {
+            stores = storeRepository.findByFloor(floor);
+        } else if (category != null) {
+            stores = storeRepository.findByCategory(category);
+        } else {
+            stores = storeRepository.findAll();
+        }
+
+        return stores.stream().map(storeService::toResponse).toList();
     }
 
     @PostMapping

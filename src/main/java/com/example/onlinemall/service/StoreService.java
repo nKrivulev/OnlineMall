@@ -5,17 +5,17 @@ import com.example.onlinemall.model.Store;
 import com.example.onlinemall.model.StoreCategory;
 import com.example.onlinemall.model.User;
 import com.example.onlinemall.repository.StoreRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class StoreService {
 
-    @Autowired
-    private StoreRepository storeRepository;
+    private final StoreRepository storeRepository;
 
     public Store saveStore(Store store) {
         return storeRepository.save(store);

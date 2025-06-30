@@ -1,7 +1,9 @@
 package com.example.onlinemall.dto;
 
+import com.example.onlinemall.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -19,6 +21,6 @@ public class RegisterRequest {
     @Size(min = 6, message = "Паролата трябва да е поне 6 символа.")
     private String password;
 
-    @NotBlank(message = "Ролята е задължителна.")
-    private String role; // USER, SELLER, ADMIN
+    @NotNull(message = "Ролята е задължителна.")
+    private Role role; // enum: USER, SELLER, ADMIN
 }

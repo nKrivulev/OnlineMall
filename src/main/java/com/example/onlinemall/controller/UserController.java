@@ -12,22 +12,27 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    // ✅ Връща информация за текущия потребител
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getMyProfile(Principal principal) {
+    public ResponseEntity<?> getMyProfile(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+
         User user = userService.getByUsername(principal.getName());
         return ResponseEntity.ok(userService.toResponse(user));
     }
 
-    // ✅ Добавяне на средства (само за логнат потребител)
     @PostMapping("/add-funds")
     public ResponseEntity<String> addFunds(Principal principal, @RequestParam double amount) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+
         if (amount <= 0) {
             return ResponseEntity.badRequest().body("Сумата трябва да е положителна.");
         }

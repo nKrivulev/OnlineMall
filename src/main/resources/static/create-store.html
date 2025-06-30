@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Създай магазин</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: linear-gradient(to right, #e9ecef, #f8f9fa);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 5rem auto;
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 2rem;
+        }
+
+        form input,
+        form select {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.7rem 0;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        form button {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1.1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div id="navbar-container"></div>
+<script src="script.js"></script>
+
+<div class="container">
+    <h1>🏬 Създай нов магазин</h1>
+
+    <form id="storeForm">
+        <input type="text" id="name" placeholder="Име на магазина" required>
+        <input type="text" id="description" placeholder="Описание" required>
+        <input type="url" id="imageUrl" placeholder="URL на изображение" required>
+
+        <select id="category" required>
+            <option value="">-- Избери категория --</option>
+            <option value="CLOTHING">👗 Мода</option>
+            <option value="ELECTRONICS">🔌 Електроника</option>
+            <option value="FOOD">🍔 Храна</option>
+            <option value="OTHER">🔧 Други</option>
+        </select>
+
+        <button type="submit">📦 Създай магазин</button>
+    </form>
+
+    <div class="back-link">
+        <a href="stores.html">⬅ Назад към магазините</a>
+    </div>
+</div>
+
+<script>
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "SELLER") {
+        alert("Само потребители с роля 'SELLER' могат да създават магазини.");
+        window.location.href = "index.html";
+    }
+
+    const categoryToFloor = {
+        CLOTHING: 1,
+        ELECTRONICS: 2,
+        FOOD: 3,
+        OTHER: 0
+    };
+
+    document.getElementById("storeForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const category = document.getElementById("category").value;
+
+        const store = {
+            name: document.getElementById("name").value.trim(),
+            description: document.getElementById("description").value.trim(),
+            imageUrl: document.getElementById("imageUrl").value.trim(),
+            floor: categoryToFloor[category] ?? 0,
+            category
+        };
+
+        const res = await fetch("http://localhost:9000/api/stores", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(store)
+        });
+
+        if (res.ok) {
+            alert("✅ Магазинът е създаден успешно!");
+            window.location.href = "stores.html";
+        } else {
+            const error = await res.text();
+            alert("❌ Грешка: " + error);
+        }
+    });
+</script>
+
+</body>
+</html>

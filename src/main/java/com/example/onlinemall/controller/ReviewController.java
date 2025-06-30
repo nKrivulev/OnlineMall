@@ -44,6 +44,20 @@ public class ReviewController {
         return ResponseEntity.ok(responses);
     }
 
+    @PostMapping("/{productId}")
+    public ResponseEntity<String> addReviewByPath(
+            @PathVariable Long productId,
+            @RequestBody ReviewInput input,
+            Principal principal
+    ) {
+        User user = userService.getByUsername(principal.getName());
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Продуктът не е намерен."));
+
+        reviewService.addReview(user, product, input.rating(), input.comment());
+        return ResponseEntity.ok("Отзивът е добавен успешно.");
+    }
+
     // ✅ Добавяне на нов отзив за продукт
     @PostMapping
     public ResponseEntity<String> addReview(

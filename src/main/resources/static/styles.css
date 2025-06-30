@@ -98,26 +98,37 @@ th {
     background-color: #f1f3f5;
 }
 
-/* Навигационна лента */
 .navbar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
     padding: 1rem;
     background: #007bff;
-    justify-content: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
 }
 
-.navbar a {
+.navbar-left,
+.navbar-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.navbar a,
+.navbar button {
     color: white;
     text-decoration: none;
     font-weight: bold;
     padding: 0.5rem 1rem;
     border-radius: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
     transition: background-color 0.3s;
 }
 
-.navbar a:hover {
+.navbar a:hover,
+.navbar button:hover {
     background-color: #0056b3;
 }

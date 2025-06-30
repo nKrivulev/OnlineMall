@@ -6,6 +6,7 @@ import com.example.onlinemall.model.User;
 import com.example.onlinemall.repository.CartItemRepository;
 import com.example.onlinemall.repository.ProductRepository;
 import com.example.onlinemall.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,6 @@ public class CartService {
         }
 
         User user = getUser(principal);
-
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Продуктът не е намерен."));
 
@@ -60,11 +60,11 @@ public class CartService {
     public void removeItem(Long cartItemId) {
         cartItemRepository.deleteById(cartItemId);
     }
-
+    @Transactional
     public ResponseEntity<String> checkout(Principal principal) {
         User user = getUser(principal);
-
         List<CartItem> cartItems = cartItemRepository.findByUser(user);
+
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body("Количката е празна.");
         }

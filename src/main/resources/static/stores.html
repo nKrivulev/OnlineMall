@@ -5,108 +5,140 @@
     <title>Магазини</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        body {
+            background: linear-gradient(to right, #f1f3f5, #e9ecef);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         .stores-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 4rem auto;
             padding: 2rem;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
 
         .stores-container h1 {
             text-align: center;
             margin-bottom: 2rem;
+            color: #333;
         }
 
         .grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
         }
 
         .card {
             background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 10px;
-            width: 260px;
+            padding: 1.5rem;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
         }
 
         .card img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-        }
-
-        .add-store-form {
-            margin-top: 3rem;
-            padding: 1.5rem;
-            background: #e9ecef;
-            border-radius: 10px;
-        }
-
-        .add-store-form input, .add-store-form select {
             width: 100%;
-            padding: 0.6rem;
-            margin: 0.5rem 0;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            max-width: 180px;
+            height: auto;
+            margin: 0 auto 1rem;
+            border-radius: 8px;
         }
 
-        .add-store-form button {
+        .card h3 {
+            margin: 0.5rem 0;
+            color: #007bff;
+        }
+
+        .card p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .card a button {
             margin-top: 1rem;
-            padding: 0.7rem 1.2rem;
+            padding: 0.6rem 1rem;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        .add-store-form button:hover {
+        .card a button:hover {
             background-color: #0056b3;
+        }
+
+        .add-store-form {
+            margin-top: 3rem;
+            padding: 2rem;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            background: #eef5ff;
+        }
+
+        .add-store-form input,
+        .add-store-form select {
+            margin-bottom: 1rem;
+        }
+
+        .add-store-form h2 {
+            text-align: center;
+            color: #333;
         }
     </style>
 </head>
 <body>
 <div id="navbar-container"></div>
+<script src="script.js"></script>
 
 <div class="stores-container">
-    <h1>Магазини</h1>
+    <h1>🛍️ Магазини</h1>
     <div id="storeList" class="grid"></div>
 
     <div id="addStoreSection" class="add-store-form" style="display: none;">
-        <h2>Добави магазин</h2>
-        <input type="text" id="storeName" placeholder="Име" required>
-        <input type="text" id="storeDesc" placeholder="Описание">
-        <input type="text" id="storeImage" placeholder="Image URL">
+        <h2>➕ Добави нов магазин</h2>
+        <input type="text" id="storeName" placeholder="Име на магазина" required>
+        <input type="text" id="storeDesc" placeholder="Описание (по избор)">
+        <input type="text" id="storeImage" placeholder="URL на изображение (пример: https://img.com/store.jpg)">
         <select id="storeFloor">
             <option value="1">Етаж 1</option>
             <option value="2">Етаж 2</option>
             <option value="3">Етаж 3</option>
         </select>
         <select id="storeCategory">
-            <option value="CLOTHING">Мода</option>
-            <option value="TECHNOLOGY">Техника</option>
-            <option value="FOOD">Храна</option>
+            <option value="CLOTHING">Мода 👗</option>
+            <option value="ELECTRONICS">Техника 💻</option>
+            <option value="FOOD">Храна 🍔</option>
+            <option value="OTHER">Друго</option>
         </select>
-        <button onclick="submitStore()">Създай</button>
+        <button onclick="submitStore()">Създай магазин</button>
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
+
     const category = new URLSearchParams(window.location.search).get("category");
     const floor = new URLSearchParams(window.location.search).get("floor");
 
     async function loadStores() {
         let url = `${API}/stores`;
-        if (category) url += `?category=${category}`;
-        if (floor) url += `?floor=${floor}`;
+        if (floor || category) {
+            const params = new URLSearchParams();
+            if (floor) params.append("floor", floor);
+            if (category) params.append("category", category);
+            url += `?${params.toString()}`;
+        }
 
         const res = await fetch(url);
         const stores = await res.json();
@@ -115,7 +147,7 @@
         container.innerHTML = "";
 
         if (stores.length === 0) {
-            container.innerHTML = "<p>Няма магазини за тази категория/етаж.</p>";
+            container.innerHTML = "<p style='text-align:center;'>Няма намерени магазини.</p>";
             return;
         }
 
@@ -123,12 +155,14 @@
             const el = document.createElement("div");
             el.className = "card";
             el.innerHTML = `
+                <img src="${store.imageUrl || 'https://via.placeholder.com/180x120?text=Store'}" alt="${store.name}">
                 <h3>${store.name}</h3>
-                <img src="${store.imageUrl}" alt="${store.name}">
-                <p>${store.description}</p>
+                <p>${store.description || 'Без описание.'}</p>
                 <p><strong>Категория:</strong> ${store.category}</p>
                 <p><strong>Етаж:</strong> ${store.floor}</p>
-                <a href="products.html?storeId=${store.id}"><button>Виж продукти</button></a>
+                <a href="products.html?storeId=${store.id}">
+                    <button>📦 Продукти</button>
+                </a>
             `;
             container.appendChild(el);
         });
@@ -141,14 +175,32 @@
         }
     }
 
+    async function submitStore() {
+        const data = {
+            name: document.getElementById("storeName").value,
+            description: document.getElementById("storeDesc").value,
+            imageUrl: document.getElementById("storeImage").value,
+            floor: parseInt(document.getElementById("storeFloor").value),
+            category: document.getElementById("storeCategory").value
+        };
+
+        const res = await fetch(`${API}/stores`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert("✅ Магазинът е създаден успешно!");
+            loadStores();
+        } else {
+            alert("❌ Грешка при създаване на магазина.");
+        }
+    }
+
     loadStores();
     checkIfSeller();
-
-    fetch("navbar.html")
-        .then(res => res.text())
-        .then(data => {
-            document.getElementById("navbar-container").innerHTML = data;
-        });
 </script>
 </body>
 </html>

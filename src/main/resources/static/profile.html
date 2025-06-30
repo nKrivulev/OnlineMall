@@ -6,40 +6,39 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         .profile-container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 5rem auto;
             padding: 2.5rem;
-            background: white;
+            background: #fff;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-            text-align: left;
         }
 
-        .profile-container h1 {
+        h1, h2 {
             text-align: center;
-            margin-bottom: 2rem;
-            color: #333;
+            color: #343a40;
+            margin-bottom: 1.5rem;
         }
 
-        .profile-container p {
+        .info {
             font-size: 1.1rem;
-            margin: 0.8rem 0;
-            color: #555;
+            color: #495057;
+            margin: 1rem 0;
         }
 
-        .profile-container input {
+        input {
             width: 100%;
             padding: 0.75rem;
             margin-top: 0.5rem;
             border-radius: 6px;
-            border: 1px solid #ccc;
+            border: 1px solid #ced4da;
             font-size: 1rem;
         }
 
-        .profile-container button {
+        button {
             width: 100%;
             padding: 0.75rem;
-            background-color: #17a2b8;
+            background-color: #28a745;
             border: none;
             border-radius: 6px;
             color: white;
@@ -49,8 +48,8 @@
             transition: background-color 0.3s ease-in-out;
         }
 
-        .profile-container button:hover {
-            background-color: #117a8b;
+        button:hover {
+            background-color: #218838;
         }
 
         .back-link {
@@ -71,15 +70,17 @@
 </head>
 <body>
 <div id="navbar-container"></div>
+<script src="script.js"></script>
 
 <div class="profile-container">
-    <h1>Профил</h1>
-    <p><strong>Потребител:</strong> <span id="username"></span></p>
-    <p><strong>Имейл:</strong> <span id="email"></span></p>
-    <p><strong>Баланс:</strong> <span id="balance"></span> лв.</p>
+    <h1>👤 Профил</h1>
 
-    <h2 style="margin-top: 30px;">Добави средства</h2>
-    <input type="number" id="amount" placeholder="Сума" min="1" required>
+    <div class="info"><strong>Потребител:</strong> <span id="username">...</span></div>
+    <div class="info"><strong>Имейл:</strong> <span id="email">...</span></div>
+    <div class="info"><strong>Баланс:</strong> <span id="balance">0.00</span> лв.</div>
+
+    <h2>💰 Добави средства</h2>
+    <input type="number" id="amount" placeholder="Сума в лв.">
     <button onclick="addBalance()">Добави</button>
 
     <div class="back-link">
@@ -87,19 +88,24 @@
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
     async function loadProfile() {
-        const user = await getCurrentUser();
-        if (!user) {
-            alert("Моля, влезте в акаунта си.");
-            window.location.href = "index.html";
-            return;
-        }
+        try {
+            const res = await fetch("/api/auth/me", { credentials: "include" });
 
-        document.getElementById("username").textContent = user.username;
-        document.getElementById("email").textContent = user.email;
-        document.getElementById("balance").textContent = user.balance.toFixed(2);
+            if (!res.ok) {
+                alert("Не сте влезли в системата.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const user = await res.json();
+            document.getElementById("username").textContent = user.username;
+            document.getElementById("email").textContent = user.email;
+            document.getElementById("balance").textContent = user.balance.toFixed(2);
+        } catch (e) {
+            console.error("Грешка при зареждане на профила:", e);
+        }
     }
 
     async function addBalance() {
@@ -109,17 +115,17 @@
             return;
         }
 
-        const res = await fetch(`${API}/users/add-balance`, {
+        const res = await fetch(`/api/users/add-funds?amount=${amount}`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount })
+            credentials: "include"
         });
 
         if (res.ok) {
-            alert("Балансът е обновен!");
+            alert("Средствата са добавени успешно.");
             loadProfile();
         } else {
-            alert("Грешка при добавяне на баланс.");
+            const error = await res.text();
+            alert("Грешка: " + error);
         }
     }
 

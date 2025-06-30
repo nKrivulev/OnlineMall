@@ -6,68 +6,109 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         .cart-container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 5rem auto;
-            padding: 2rem;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
         }
 
         .cart-container h1 {
             text-align: center;
             margin-bottom: 2rem;
-            color: #333;
+            font-size: 2.5rem;
+            color: #343a40;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
         }
 
-        .summary {
+        .card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            padding: 1.5rem;
             text-align: center;
-            margin-top: 2rem;
-            font-size: 1.2rem;
         }
 
-        .summary button {
-            margin-top: 1rem;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 6px;
-            background-color: #28a745;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+        .card h3 {
+            margin-bottom: 1rem;
+            color: #007bff;
         }
 
-        .summary button:hover {
-            background-color: #218838;
+        .card img {
+            width: 100%;
+            max-width: 150px;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .card p {
+            margin: 0.3rem 0;
+            color: #555;
+            font-size: 0.95rem;
         }
 
         .card button {
-            margin-top: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
             background-color: #dc3545;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
         }
 
         .card button:hover {
             background-color: #bb2d3b;
         }
 
+        .summary {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-size: 1.3rem;
+        }
+
+        .summary button {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .summary button:hover {
+            background-color: #218838;
+        }
+
         .back-link {
             text-align: center;
             margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 <div id="navbar-container"></div>
+<script src="script.js"></script>
 
 <div class="cart-container">
-    <h1>Моята количка</h1>
+    <h1>🛒 Моята количка</h1>
     <div id="cartItems" class="grid"></div>
 
     <div class="summary">
@@ -80,7 +121,6 @@
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
     async function loadCart() {
         const res = await fetch(`${API}/cart`);
@@ -106,7 +146,7 @@
 
             el.innerHTML = `
                 <h3>${item.product.name}</h3>
-                <img src="${item.product.imageUrl}" width="120">
+                <img src="${item.product.imageUrl}" alt="${item.product.name}">
                 <p><strong>Брой:</strong> ${item.quantity}</p>
                 <p><strong>Цена:</strong> ${item.product.price.toFixed(2)} лв.</p>
                 <p><strong>Общо:</strong> ${subtotal.toFixed(2)} лв.</p>
@@ -129,14 +169,17 @@
     }
 
     async function checkout() {
-        const res = await fetch(`${API}/cart/checkout`, { method: "POST" });
+        const res = await fetch(`${API}/cart/checkout`, {
+            method: "POST",
+            credentials: "include"
+        });
 
         if (res.ok) {
-            const msg = await res.text();
-            alert(msg);
-            loadCart();
+            alert("✅ Успешно завършена поръчка!");
+            window.location.reload();
         } else {
-            alert("Грешка при поръчката.");
+            const errorMsg = await res.text();
+            alert("❌ Грешка при поръчката: " + errorMsg);
         }
     }
 

@@ -11,4 +11,5 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     List<Store> findByFloor(int floor);
     List<Store> findByOwner(User owner);
     List<Store> findByCategory(StoreCategory category);
+    List<Store> findByFloorAndCategory(int floor, StoreCategory category);
 }

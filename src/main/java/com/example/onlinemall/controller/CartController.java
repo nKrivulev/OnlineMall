@@ -1,8 +1,8 @@
 package com.example.onlinemall.controller;
 
+import com.example.onlinemall.dto.AddToCartRequest;
 import com.example.onlinemall.model.CartItem;
 import com.example.onlinemall.service.CartService;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +18,13 @@ public class CartController {
 
     private final CartService cartService;
 
-    @PostMapping("/add")
+    @PostMapping("/{productId}")
     public ResponseEntity<?> addToCart(
             Principal principal,
-            @RequestParam Long productId,
-            @RequestParam @Min(1) int quantity
+            @PathVariable Long productId,
+            @RequestBody AddToCartRequest input
     ) {
-        return cartService.addToCart(principal, productId, quantity);
+        return cartService.addToCart(principal, productId, input.getQuantity());
     }
 
     @GetMapping

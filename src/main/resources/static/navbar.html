@@ -1,51 +1,23 @@
 <div class="navbar">
-    <a href="index.html">🏠 Начало</a>
-    <a href="stores.html">🛍️ Магазини</a>
-    <a href="cart.html" id="cartLink" style="display:none;">🛒 Количка</a>
-    <a href="profile.html" id="profileLink" style="display:none;">👤 Профил</a>
-    <a href="admin.html" id="adminLink" style="display:none;">🛡️ Админ</a>
-    <a href="login.html" id="loginLink">🔐 Вход</a>
-    <a href="register.html" id="registerLink">📝 Регистрация</a>
-    <a href="#" onclick="logout()" id="logoutLink" style="display:none;">🚪 Изход</a>
+    <div class="navbar-left">
+        <a href="index.html">🏠 Начало</a>
+        <a href="stores.html">🛍️ Магазини</a>
+    </div>
+
+    <div class="navbar-right">
+        <!-- Видимо само ако НЕ е логнат -->
+        <a href="login.html" id="login-link">🔐 Вход</a>
+        <a href="register.html" id="register-link">📝 Регистрация</a>
+
+        <!-- Видимо само ако Е логнат -->
+        <span id="user-links" style="display: none;">
+            <a href="profile.html">👤 Профил</a>
+            <a href="cart.html">🛒 Количка</a>
+            <a href="orders.html" id="orders-link">📦 Поръчки</a>
+            <a href="admin.html" id="admin-link" style="display: none;">👮 Админ панел</a>
+            <a href="create-store.html" id="create-store-link" style="display: none;">➕ Нов магазин</a>
+            <!-- 🛑 Премахнато: <a href="stores.html" id="seller-link" style="display: none;">🏬 Моите магазини</a> -->
+            <button id="logout-button">🚪 Изход</button>
+        </span>
+    </div>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const user = await getCurrentUser();
-        if (user) {
-            document.getElementById("loginLink").style.display = "none";
-            document.getElementById("registerLink").style.display = "none";
-            document.getElementById("logoutLink").style.display = "inline";
-            document.getElementById("profileLink").style.display = "inline";
-            document.getElementById("cartLink").style.display = "inline";
-            if (user.role === "ADMIN") {
-                document.getElementById("adminLink").style.display = "inline";
-            }
-        }
-    });
-
-    async function getCurrentUser() {
-        try {
-            const res = await fetch("/api/users/me", {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
-
-            if (res.ok) {
-                return await res.json();
-            }
-        } catch (e) {
-            console.error("Грешка при взимане на потребителя:", e);
-        }
-
-        return null;
-    }
-
-    function logout() {
-        fetch("/logout", { method: "POST" })
-            .then(() => location.href = "/login.html");
-    }
-</script>

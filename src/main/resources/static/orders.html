@@ -6,35 +6,48 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         .orders-container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 5rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
 
         .orders-container h1 {
             text-align: center;
             margin-bottom: 2rem;
-            color: #333;
+            font-size: 2.5rem;
+            color: #343a40;
         }
 
         .card {
             background: #f8f9fa;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .card p {
+            margin: 0.3rem 0;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .card strong {
+            color: #333;
         }
 
         .card ul {
-            padding-left: 1.2rem;
             margin-top: 0.5rem;
+            padding-left: 1.5rem;
         }
 
         .card li {
             margin-bottom: 0.3rem;
+            color: #555;
+            font-size: 0.95rem;
         }
 
         .back-link {
@@ -45,6 +58,7 @@
         .back-link a {
             color: #007bff;
             text-decoration: none;
+            font-weight: bold;
         }
 
         .back-link a:hover {
@@ -54,9 +68,10 @@
 </head>
 <body>
 <div id="navbar-container"></div>
+<script src="script.js"></script>
 
 <div class="orders-container">
-    <h1>Моите поръчки</h1>
+    <h1>📦 Моите поръчки</h1>
     <div id="orders"></div>
 
     <div class="back-link">
@@ -64,48 +79,55 @@
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
     async function loadOrders() {
-        const user = await getCurrentUser();
+        const user = JSON.parse(localStorage.getItem("user"));
         if (!user) {
-            alert("Моля, влезте в акаунта си.");
-            window.location.href = "index.html";
+            alert("Трябва да сте влезли, за да видите поръчките си.");
+            window.location.href = "login.html";
             return;
         }
 
-        const res = await fetch(`${API}/orders`);
-        const orders = await res.json();
+        const response = await fetch("http://localhost:9000/api/orders", {
+            credentials: "include"
+        });
 
+        if (response.ok) {
+            const orders = await response.json();
+            console.log("📦 Поръчки:", orders);
+            renderOrders(orders); // ако имаш такава функция
+        } else {
+            alert("Грешка при зареждане на поръчки.");
+        }
+    }
+    function renderOrders(orders) {
         const container = document.getElementById("orders");
         container.innerHTML = "";
 
         if (orders.length === 0) {
-            container.innerHTML = "<p>Все още нямате направени поръчки.</p>";
+            container.innerHTML = "<p>Нямате направени поръчки.</p>";
             return;
         }
 
         orders.forEach(order => {
-            const el = document.createElement("div");
-            el.className = "card";
+            const card = document.createElement("div");
+            card.className = "card";
 
-            const createdAt = new Date(order.createdAt).toLocaleString("bg-BG");
+            const date = new Date(order.createdAt).toLocaleString('bg-BG');
+            const productList = order.products.map(p => `<li>${p.name} - ${p.price.toFixed(2)} лв.</li>`).join("");
 
-            let productsList = "";
-            order.products.forEach(p => {
-                productsList += `<li>${p.name} – ${p.price.toFixed(2)} лв.</li>`;
-            });
+            card.innerHTML = `
+            <p><strong>Поръчка №:</strong> ${order.id}</p>
+            <p><strong>Дата:</strong> ${date}</p>
+            <p><strong>Обща сума:</strong> ${order.totalAmount.toFixed(2)} лв.</p>
+            <p><strong>Продукти:</strong></p>
+            <ul>${productList}</ul>
+        `;
 
-            el.innerHTML = `
-                <p><strong>Поръчка №:</strong> ${order.id}</p>
-                <p><strong>Дата:</strong> ${createdAt}</p>
-                <p><strong>Сума:</strong> ${order.totalAmount.toFixed(2)} лв.</p>
-                <ul>${productsList}</ul>
-            `;
-
-            container.appendChild(el);
+            container.appendChild(card);
         });
     }
+
 
     loadOrders();
 </script>

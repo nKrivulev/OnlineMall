@@ -1,74 +1,77 @@
 package com.example.onlinemall.config;
 
+import com.example.onlinemall.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/navbar.html",
-                                "/styles.css",
-                                "/script.js",
-                                "/register.html",
-                                "/login.html",
-                                "/stores.html",
-                                "/products.html",
-                                "/reviews.html",
-                                "/profile.html",
-                                "/orders.html",
-                                "/favicon.ico",
-                                "/images/**",
-                                "/static/**",
-                                "/api/stores/**",
-                                "/api/reviews/product/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(login -> login
-                        .loginPage("/login.html")
-                        .defaultSuccessUrl("/welcome.html", false)
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login.html")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                );
+    private final CustomUserDetailsService userDetailsService;
 
-        return http.build();
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return userDetailsService;
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .userDetailsService(userDetailsService)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/", "/index.html",
+                                "/login.html", "/register.html",
+                                "/stores.html", "/products.html", "/reviews.html",
+                                "/styles.css", "/script.js", "/navbar.html",
+                                "/favicon.ico", "/h2-console/**",
+                                "/api/auth/**",
+                                "/api/stores/**",         // позволяваме публичен достъп до магазините
+                                "/api/products/**",       // позволяваме публичен достъп до продуктите
+                                "/api/reviews/product/**" // позволяваме достъп до преглед на отзиви
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login.html")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/index.html", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login.html")
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                        })
+                )
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.disable());
+
+        return http.build();
     }
 }

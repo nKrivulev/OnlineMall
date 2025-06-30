@@ -5,56 +5,71 @@
     <title>Регистрация</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        body {
+            background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         .register-container {
-            max-width: 400px;
+            max-width: 450px;
             margin: 5rem auto;
-            padding: 2rem;
+            padding: 2.5rem;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         .register-container h1 {
-            margin-bottom: 2rem;
             color: #333;
+            margin-bottom: 2rem;
         }
 
-        .register-container input, .register-container select {
+        input, select {
             width: 100%;
-            padding: 0.7rem;
-            margin: 0.5rem 0;
-            border-radius: 6px;
+            padding: 0.9rem;
+            margin: 0.7rem 0;
             border: 1px solid #ccc;
-        }
-
-        .register-container button {
-            padding: 0.7rem 1.2rem;
-            margin-top: 1rem;
-            background-color: #007bff;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            cursor: pointer;
+            border-radius: 8px;
             font-size: 1rem;
         }
 
-        .register-container button:hover {
-            background-color: #0056b3;
+        button {
+            width: 100%;
+            padding: 0.9rem;
+            margin-top: 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        .register-container p {
-            margin-top: 1.2rem;
-            font-size: 0.9rem;
+        button:hover {
+            background-color: #218838;
         }
 
-        .register-container a {
+        p {
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        a {
             color: #007bff;
             text-decoration: none;
         }
 
-        .register-container a:hover {
+        a:hover {
             text-decoration: underline;
+        }
+
+        .captcha-container {
+            margin-top: 1rem;
+            text-align: left;
         }
     </style>
 </head>
@@ -73,21 +88,35 @@
             <option value="SELLER">Продавач</option>
             <option value="ADMIN">Админ</option>
         </select>
+
+        <div class="captcha-container">
+            <label id="captchaQuestion"></label>
+            <input type="number" id="captchaAnswer" placeholder="Отговор" required>
+        </div>
+
         <button type="submit">Регистрирай се</button>
     </form>
-    <p>Имаш акаунт? <a href="index.html">Влез</a></p>
+    <p>Имаш акаунт? <a href="login.html">Влез</a></p>
 </div>
 
-<script src="script.js"></script>
 <script>
-    fetch("navbar.html")
-        .then(res => res.text())
-        .then(data => {
-            document.getElementById("navbar-container").innerHTML = data;
-        });
+    let num1, num2;
+
+    function generateCaptcha() {
+        num1 = Math.floor(Math.random() * 10) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
+        document.getElementById('captchaQuestion').textContent = `Колко е ${num1} + ${num2}?`;
+    }
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        const answer = parseInt(document.getElementById('captchaAnswer').value);
+        if (answer !== num1 + num2) {
+            alert("Грешен отговор на въпроса за сигурност.");
+            generateCaptcha();
+            return;
+        }
 
         const data = {
             username: document.getElementById('username').value,
@@ -96,7 +125,7 @@
             role: document.getElementById('role').value
         };
 
-        const res = await fetch(`${API}/auth/register`, {
+        const res = await fetch("http://localhost:9000/api/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -104,11 +133,14 @@
 
         if (res.ok) {
             alert("Регистрацията е успешна!");
-            window.location.href = "index.html";
+            window.location.href = "login.html";
         } else {
-            alert("Регистрацията се провали. Проверете данните.");
+            alert("Грешка при регистрация. Проверете въведените данни.");
+            generateCaptcha();
         }
     });
+
+    generateCaptcha();
 </script>
 </body>
 </html>

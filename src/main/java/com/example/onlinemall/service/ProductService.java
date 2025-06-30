@@ -4,20 +4,18 @@ import com.example.onlinemall.dto.ProductResponse;
 import com.example.onlinemall.model.Product;
 import com.example.onlinemall.model.Store;
 import com.example.onlinemall.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
-
-    @Autowired
-    private ReviewService reviewService;
+    private final ProductRepository productRepository;
+    private final ReviewService reviewService;
 
     public Product saveProduct(Product product) {
         return productRepository.save(product);
@@ -69,14 +67,9 @@ public class ProductService {
         response.setImageUrl(product.getImageUrl());
         response.setStoreName(product.getStore().getName());
 
-        // 👉 Добавяме рейтинг и брой ревюта
-        double averageRating = reviewService.getAverageRating(product);
-        int reviewCount = reviewService.getReviewsForProduct(product).size();
-
-        response.setAverageRating(averageRating);
-        response.setReviewCount(reviewCount);
+        response.setAverageRating(reviewService.getAverageRating(product));
+        response.setReviewCount(reviewService.getReviewsForProduct(product).size());
 
         return response;
     }
-
 }

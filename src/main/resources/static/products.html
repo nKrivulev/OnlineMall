@@ -2,59 +2,117 @@
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
-    <title>Продукти в магазина</title>
+    <title>Продукти</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        body {
+            background: linear-gradient(to right, #f1f3f5, #e9ecef);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         .product-container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 5rem auto;
             padding: 2rem;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         }
 
         .product-container h1 {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             color: #333;
+        }
+
+        .search-box {
+            max-width: 400px;
+            margin: 0 auto 2rem;
+            text-align: center;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
         }
 
-        #addProductSection {
-            margin-top: 3rem;
-            padding: 2rem;
+        .card {
             background: #f8f9fa;
-            border-radius: 10px;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
         }
 
-        #addProductSection input {
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        .card img {
             width: 100%;
-            padding: 0.7rem;
+            max-width: 180px;
+            height: 150px;
+            object-fit: cover;
+            margin: 0 auto 1rem;
+            border-radius: 8px;
+        }
+
+        .card h3 {
             margin: 0.5rem 0;
+            color: #007bff;
+        }
+
+        .card p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .card input[type="number"] {
+            width: 60px;
+            margin-top: 0.5rem;
+            padding: 0.4rem;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 1rem;
+            text-align: center;
         }
 
-        #addProductSection button {
-            margin-top: 0.5rem;
-            padding: 0.7rem 1.5rem;
+        .card button {
+            margin-top: 1rem;
+            padding: 0.6rem 1rem;
             background-color: #007bff;
+            color: white;
             border: none;
             border-radius: 6px;
-            color: white;
-            font-size: 1rem;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        #addProductSection button:hover {
+        .card button:hover {
             background-color: #0056b3;
+        }
+
+        .card a {
+            display: inline-block;
+            margin-top: 0.5rem;
+            text-decoration: none;
+            color: #007bff;
+            font-size: 0.9rem;
+        }
+
+        .card a:hover {
+            text-decoration: underline;
         }
 
         .back-link {
@@ -74,82 +132,95 @@
 </head>
 <body>
 <div id="navbar-container"></div>
+<script src="script.js"></script>
 
 <div class="product-container">
-    <h1 id="storeTitle">Продукти</h1>
-    <div id="productList" class="grid"></div>
+    <h1>🛒 Продукти в магазина</h1>
 
-    <div id="addProductSection" style="display: none;">
-        <h2>Добави продукт</h2>
-        <input type="text" id="productName" placeholder="Име" required>
-        <input type="text" id="productDesc" placeholder="Описание">
-        <input type="number" id="productPrice" placeholder="Цена" min="0" required>
-        <input type="text" id="productImage" placeholder="Image URL">
-        <button onclick="addProduct()">Добави</button>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Търси продукт по име...">
     </div>
+
+    <div id="productList" class="grid"></div>
 
     <div class="back-link">
         <a href="stores.html">⬅ Назад към магазините</a>
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
     const storeId = new URLSearchParams(window.location.search).get('storeId');
+    let products = [];
 
     async function loadProducts() {
-        const res = await fetch(`${API}/stores/${storeId}/products`);
-        const data = await res.json();
+        const res = await fetch(`/api/products/public/store/${storeId}`);
+        products = await res.json();
+        displayProducts(products);
+    }
 
+    function displayProducts(data) {
         const container = document.getElementById("productList");
         container.innerHTML = "";
 
         data.forEach(p => {
             const el = document.createElement("div");
             el.className = "card";
+
+            const image = p.imageUrl || "https://via.placeholder.com/180x150?text=Product";
+
             el.innerHTML = `
                 <h3>${p.name}</h3>
-                <img src="${p.imageUrl}" alt="${p.name}" width="150">
+                <img src="${image}" alt="${p.name}">
                 <p>${p.description}</p>
                 <p><strong>Цена:</strong> ${p.price.toFixed(2)} лв.</p>
+                <label>Количество:</label><br>
+                <input type="number" min="1" value="1" id="qty-${p.id}">
                 <button onclick="addToCart(${p.id})">Добави в количката</button>
-                <a href="reviews.html" onclick="localStorage.setItem('currentProductId', ${p.id})">📝 Виж отзиви</a>
+                <a href="reviews.html" onclick="
+    localStorage.setItem('currentProductId', ${p.id});
+    localStorage.setItem('currentStoreId', '${storeId}');
+">📝 Виж отзиви</a>
+
+
             `;
             container.appendChild(el);
         });
     }
 
-    async function checkIfSeller() {
-        const user = await getCurrentUser();
-        if (user && user.role === "SELLER") {
-            document.getElementById("addProductSection").style.display = "block";
-        }
+    function filterProducts() {
+        const keyword = document.getElementById("searchInput").value.toLowerCase();
+        const filtered = products.filter(p => p.name.toLowerCase().includes(keyword));
+        displayProducts(filtered);
     }
 
-    async function addProduct() {
-        const data = {
-            name: document.getElementById("productName").value,
-            description: document.getElementById("productDesc").value,
-            price: parseFloat(document.getElementById("productPrice").value),
-            imageUrl: document.getElementById("productImage").value
-        };
+    async function addToCart(productId) {
+        const qtyInput = document.getElementById(`qty-${productId}`);
+        const quantity = parseInt(qtyInput.value);
 
-        const res = await fetch(`${API}/stores/${storeId}/products`, {
+        if (quantity < 1) {
+            alert("Минимално количество: 1");
+            return;
+        }
+
+        const res = await fetch(`${API}/cart/${productId}`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ quantity })
         });
 
         if (res.ok) {
-            alert("Продуктът е добавен!");
-            loadProducts();
+            alert("✅ Продуктът е добавен в количката.");
         } else {
-            alert("Грешка при добавяне.");
+            const error = await res.text();
+            alert("❌ Грешка: " + error);
         }
     }
 
+    document.getElementById("searchInput").addEventListener("input", filterProducts);
     loadProducts();
-    checkIfSeller();
 </script>
 </body>
 </html>

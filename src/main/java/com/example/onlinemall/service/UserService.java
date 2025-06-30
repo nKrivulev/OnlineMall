@@ -2,16 +2,14 @@ package com.example.onlinemall.service;
 
 import com.example.onlinemall.dto.RegisterRequest;
 import com.example.onlinemall.dto.UserResponse;
-import com.example.onlinemall.model.Role;
 import com.example.onlinemall.model.User;
 import com.example.onlinemall.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,24 +31,11 @@ public class UserService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.valueOf(request.getRole().toUpperCase()))
+                .role(request.getRole())
                 .balance(0.0)
                 .build();
 
         return userRepository.save(user);
-    }
-
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
-
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Потребителят не е намерен"));
-    }
-
-    public Optional<User> getByEmail(String email) {
-        return userRepository.findByEmail(email);
     }
 
     public User getByUsername(String username) {
@@ -58,19 +43,23 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Потребителят не е намерен"));
     }
 
+    public Optional<User> getByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 
-    public void addBalance(String email, double amount) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Потребителят не е намерен"));
-        user.setBalance(user.getBalance() + amount);
-        userRepository.save(user);
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("Потребителят не съществува");
+        }
+        userRepository.deleteById(id);
     }
 
     public UserResponse toResponse(User user) {
@@ -78,6 +67,7 @@ public class UserService {
         response.setUsername(user.getUsername());
         response.setEmail(user.getEmail());
         response.setBalance(user.getBalance());
+        response.setRole(user.getRole().name());
         return response;
     }
 }
