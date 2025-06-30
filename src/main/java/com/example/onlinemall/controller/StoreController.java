@@ -42,8 +42,9 @@ public class StoreController {
     }
 
     @GetMapping("/{storeId}")
-    public ResponseEntity<Store> getStoreById(@PathVariable Long storeId) {
+    public ResponseEntity<StoreResponse> getStoreById(@PathVariable Long storeId) {
         return storeService.getStoreById(storeId)
+                .map(storeService::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

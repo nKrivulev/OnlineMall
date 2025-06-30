@@ -27,6 +27,18 @@
             color: #333;
         }
 
+        #addProductBtn {
+            text-align: center;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        #addProductBtn button {
+            background-color: #28a745;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
         .search-box {
             max-width: 400px;
             margin: 0 auto 2rem;
@@ -137,6 +149,10 @@
 <div class="product-container">
     <h1>🛒 Продукти в магазина</h1>
 
+    <div id="addProductBtn">
+        <a id="addLink" href="#"><button>➕ Добави нов продукт</button></a>
+    </div>
+
     <div class="search-box">
         <input type="text" id="searchInput" placeholder="Търси продукт по име...">
     </div>
@@ -153,7 +169,7 @@
     let products = [];
 
     async function loadProducts() {
-        const res = await fetch(`/api/products/public/store/${storeId}`);
+        const res = await fetch(`${API}/products/public/store/${storeId}`);
         products = await res.json();
         displayProducts(products);
     }
@@ -177,20 +193,12 @@
                 <input type="number" min="1" value="1" id="qty-${p.id}">
                 <button onclick="addToCart(${p.id})">Добави в количката</button>
                 <a href="reviews.html" onclick="
-    localStorage.setItem('currentProductId', ${p.id});
-    localStorage.setItem('currentStoreId', '${storeId}');
-">📝 Виж отзиви</a>
-
-
+                    localStorage.setItem('currentProductId', ${p.id});
+                    localStorage.setItem('currentStoreId', '${storeId}');
+                ">📝 Виж отзиви</a>
             `;
             container.appendChild(el);
         });
-    }
-
-    function filterProducts() {
-        const keyword = document.getElementById("searchInput").value.toLowerCase();
-        const filtered = products.filter(p => p.name.toLowerCase().includes(keyword));
-        displayProducts(filtered);
     }
 
     async function addToCart(productId) {
@@ -219,8 +227,32 @@
         }
     }
 
+    async function checkIfSellerOwner() {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || user.role !== "SELLER") return;
+
+        const res = await fetch(`${API}/stores/${storeId}`, { credentials: "include" });
+        if (res.ok) {
+            const store = await res.json();
+            if (store.ownerUsername === user.username) {
+                const btn = document.getElementById("addProductBtn");
+                const link = document.getElementById("addLink");
+                btn.style.display = "block";
+                link.href = `add-product.html?storeId=${storeId}`;
+            }
+        }
+    }
+
     document.getElementById("searchInput").addEventListener("input", filterProducts);
+
+    function filterProducts() {
+        const keyword = document.getElementById("searchInput").value.toLowerCase();
+        const filtered = products.filter(p => p.name.toLowerCase().includes(keyword));
+        displayProducts(filtered);
+    }
+
     loadProducts();
+    checkIfSellerOwner();
 </script>
 </body>
 </html>

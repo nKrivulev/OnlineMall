@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавяне на продукт</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .form-box {
+            max-width: 600px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .form-box h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #007bff;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<div id="navbar-container"></div>
+<script src="script.js"></script>
+
+<div class="form-box">
+    <h2>➕ Нов продукт</h2>
+    <form id="productForm">
+        <label for="name">Име:</label>
+        <input type="text" id="name" required>
+
+        <label for="description">Описание:</label>
+        <textarea id="description" rows="3" required></textarea>
+
+        <label for="price">Цена (лв.):</label>
+        <input type="number" id="price" step="0.01" min="0" required>
+
+        <label for="imageUrl">URL на снимка:</label>
+        <input type="text" id="imageUrl" required>
+
+        <button type="submit">✅ Създай</button>
+    </form>
+</div>
+
+<script>
+    const storeId = new URLSearchParams(window.location.search).get("storeId");
+
+    document.getElementById("productForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const payload = {
+            name: document.getElementById("name").value.trim(),
+            description: document.getElementById("description").value.trim(),
+            price: parseFloat(document.getElementById("price").value),
+            imageUrl: document.getElementById("imageUrl").value.trim()
+        };
+
+        const res = await fetch(`/api/products/add/${storeId}`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert("✅ Продуктът беше добавен успешно!");
+            window.location.href = `products.html?storeId=${storeId}`;
+        } else {
+            const error = await res.text();
+            alert("❌ Грешка при добавяне: " + error);
+        }
+    });
+</script>
+</body>
+</html>
